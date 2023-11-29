@@ -2,107 +2,136 @@ import React, { useState, useEffect } from 'react';
 import defaultAvatar from './images/avatar_default.png';
 import { MdLocalPostOffice, MdGroups, MdArticle } from 'react-icons/md';
 import BasicButtonExample from './ButtonDropw';
+import CustomModal from './Modal';
+import axios from 'axios';
+import './Card.css'
 
-const Card = ({ posts }) => {
-  const [expandedPosts, setExpandedPosts] = useState([]);
+const Card = () => {
+    const [posts, setPosts] = useState([]);
+    const [expandedPosts, setExpandedPosts] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editPost, setEditPost] = useState(null);
 
-  useEffect(() => {
-    setExpandedPosts(posts.map(() => false));
-  }, [posts]);
+    useEffect(() => {
+        fetchPosts();
+    }, []);
 
-  const cardContainerStyle = {
-    display: 'flex',
-    flexDirection: 'column', // Para os cards ficarem um abaixo do outro
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: '5rem',
+    const fetchPosts = async () => {
+        try {
+            const response = await axios.get('http://127.0.0.1:8000/api/posts');
+            setPosts(response.data);
+        } catch (error) {
+            console.error('Erro ao buscar os posts:', error);
+        }
+    };
+
+  const formatDate = (dateString) => {
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit', 
+      minute: '2-digit' 
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const categoryIcon = {
-    margin: '0 10px 0 0', /* Ajuste o valor de margem conforme necessário */
-  }
-  const cardStyle = {
-    border: '1px solid #ccc',
-    borderRadius: '5px',
-    padding: '15px',
-    marginBottom: '45px', // Espaço entre os cards
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    position: 'relative',
-    width: '75%',
-    maxWidth: '600px',
-  };
+    useEffect(() => {
+        setExpandedPosts(posts.map(() => false));
+    }, [posts]);
 
-  const headerStyle = {
-    borderBottom: '1px solid #ccc',
-    marginBottom: '10px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  };
+    const handleEdit = (post) => {
+        setEditPost(post);
+        setIsModalOpen(true);
+    };
 
-  const titleIcon = {
-    margin: '0 0 0 -85%'
-  }
+    //verify logic and details
+    const updatePosts = (updatedPost) => {
+        console.log(updatedPost, 'updatedPost')
+    };
 
-  const toggleExpand = (index) => {
-    const newExpandedPosts = [...expandedPosts];
-    newExpandedPosts[index] = !newExpandedPosts[index];
-    setExpandedPosts(newExpandedPosts);
-  };
+    const handleDelete = async (postId) => {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/api/posts/${postId}`);
+        // Atualize o estado dos posts após a exclusão, removendo o post excluído
+        setPosts(posts.filter((post) => post.id !== postId));
+      } catch (error) {
+        console.error('Erro ao excluir o post:', error);
+      }
+    };
 
-  const stripHtmlTags = (html) => {
-    const tmp = document.createElement('div');
-    tmp.innerHTML = html;
-    return tmp.textContent || tmp.innerText || '';
-  };
+    const toggleExpand = (index) => {
+        const newExpandedPosts = [...expandedPosts];
+        newExpandedPosts[index] = !newExpandedPosts[index];
+        setExpandedPosts(newExpandedPosts);
+    };
 
-  const categorias = {
-    categoria2: { nome: 'Post', icone: <MdLocalPostOffice /> },
-    categoria3: { nome: 'Artigo', icone: <MdArticle /> },
-    categoria4: { nome: 'Grupo', icone: <MdGroups /> },
-  };
+    const stripHtmlTags = (html) => {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || '';
+    };
 
-  return (
-    <div style={cardContainerStyle}>
-      {posts.map((post, index) => (
-        <div key={index} className="card" style={cardStyle}>
-          <div className="card-header" style={{ ...headerStyle, display: 'flex', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <img
-                src={defaultAvatar}
-                alt="Avatar do Autor"
-                width="38"
-                height="38"
-                style={{ borderRadius: '50%', marginRight: '10px' }}
-              />
-              <h4>Autor: {post.titulo}</h4>
+    const categorias = {
+        categoria2: { nome: 'Post', icone: <MdLocalPostOffice /> },
+        categoria3: { nome: 'Artigo', icone: <MdArticle /> },
+        categoria4: { nome: 'Grupo', icone: <MdGroups /> },
+    };
+
+    return (
+        <div className="card-container">
+            {posts.map((post, index) => (
+                <div key={post.id} className="card card-style">
+                    <div className="card-header header">
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <img
+                                src={defaultAvatar}
+                                alt="Avatar do Autor"
+                                width="38"
+                                height="38"
+                                style={{ borderRadius: '50%', margin: '0 15px' }}
+                            />
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
+              <h4 style={{margin: '0 0 5px 0'}}>Autor: {post.author}</h4>
+              <p style={{margin: '0'}}>Publicado em: {formatDate(post.created_at)}</p>
             </div>
-            <BasicButtonExample />
-          </div>
-          <div style={titleIcon}>
-          <p>
-            {/* Renderizar o ícone com base na categoria */}
-            <span style={categoryIcon}>{categorias[post.categoria].icone}</span>
-                    {categorias[post.categoria].nome}
-          </p>
-          </div>
-          <div
-            className="card-body"
-            dangerouslySetInnerHTML={{
-              __html: expandedPosts[index]
-                ? post.mensagem
-                : stripHtmlTags(post.mensagem).substring(0, 500),
-            }}
-          ></div>
-          {post.mensagem.length > 500 && (
-            <button onClick={() => toggleExpand(index)}>
-              {expandedPosts[index] ? 'Mostrar menos' : 'Leia mais...'}
-            </button>
-          )}
+                        </div>
+                        <BasicButtonExample onEdit={() => handleEdit(post)} onDelete={() => handleDelete(post.id)} />
+                    </div>
+                    <div className="title-icon">
+                        <p>
+                            <span className="category-icon">
+                                {categorias[post.category] ? categorias[post.category].icone : null}
+                            </span>
+                            {categorias[post.category] ? categorias[post.category].nome : 'Categoria desconhecida'}
+                        </p>
+                    </div>
+                    <div
+                        className="card-body"
+                        dangerouslySetInnerHTML={{
+                            __html: expandedPosts[index]
+                                ? post.message
+                                : stripHtmlTags(post.message).substring(0, 500),
+                        }}
+                    ></div>
+                    {post.message.length > 500 && (
+                        <button onClick={() => toggleExpand(index)}>
+                            {expandedPosts[index] ? 'Mostrar menos' : 'Leia mais...'}
+                        </button>
+                    )}
+                </div>
+            ))}
+            {isModalOpen && (
+                <CustomModal
+                    isOpen={isModalOpen}
+                    closeModal={() => setIsModalOpen(false)}
+                    setJsonData={updatePosts}
+                    editPost={editPost}
+                    isEditMode={!!editPost}
+                />
+            )}
         </div>
-      ))}
-    </div>
-  );
+    );
 };
 
 export default Card;

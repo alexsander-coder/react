@@ -20,7 +20,7 @@ const CustomModal = ({ isOpen, closeModal, setJsonData, editPost, isEditMode }) 
 
     useEffect(() => {
         if (isEditMode && editPost) {
-            // Se estiver no modo de edição e um post for fornecido, preencha o estado com os dados do post
+            // se estiver no modo de edição e um post for fornecido, preencha o estado com os dados do post
             setauthor(editPost.author);
             setCategoria(editPost.category);
             setMensagem(editPost.message);
@@ -57,20 +57,20 @@ const CustomModal = ({ isOpen, closeModal, setJsonData, editPost, isEditMode }) 
             return true;
         }
     };
-
     const handleSubmit = async (e) => {
+        
         e.preventDefault();
     
         if (validarAutorVazio() && validarAutorNumeros() && validarCategoria()) {
-            const newPost = { author, category, message };
-        
+            const cleanMessage = message.replace(/<[^>]+>/g, '');
+            const newPost = { author, category, message: cleanMessage };
             try {
                 let response;
                 if (isEditMode) {
-                    // Editar post existente
+                    // editar post existente
                     response = await axios.put(`http://127.0.0.1:8000/api/posts/${editPost.id}`, newPost);
                 } else {
-                    // Criar novo post
+                    // criar novo post
                     response = await axios.post('http://127.0.0.1:8000/api/posts', newPost);
                 }
 
@@ -100,7 +100,7 @@ const CustomModal = ({ isOpen, closeModal, setJsonData, editPost, isEditMode }) 
             <form onSubmit={handleSubmit} className="modal-form">
                 <h2 className="modal-heading">{isEditMode ? 'Editar Post' : 'Criar Post'}</h2>
                 <button onClick={handleClose} className="close-button">
-                    X
+                    <p className="dentro">X</p>
                 </button>
                 <hr className="modal-hr" />
                 <div className="form-field">

@@ -9,6 +9,11 @@
   .category-icon {
     margin: 0 10px 0 0;
   }
+
+  .btnConfirm{
+    margin-right: 4%;
+    background-color: red;
+  }
   
   .card {
     border: 1px solid #ccc;

@@ -6,24 +6,25 @@ import CustomModal from './Modal';
 import axios from 'axios';
 import './Card.css'
 
+
 const Card = () => {
-    const [posts, setPosts] = useState([]);
-    const [expandedPosts, setExpandedPosts] = useState([]);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editPost, setEditPost] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [expandedPosts, setExpandedPosts] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editPost, setEditPost] = useState(null);
 
-    useEffect(() => {
-        fetchPosts();
-    }, []);
+  useEffect(() => {
+      loadPosts(); // Altere para loadPosts
+  }, []);
 
-    const fetchPosts = async () => {
-        try {
-            const response = await axios.get('http://127.0.0.1:8000/api/posts');
-            setPosts(response.data);
-        } catch (error) {
-            console.error('Erro ao buscar os posts:', error);
-        }
-    };
+  const loadPosts = async () => { // Altere o nome da função para loadPosts
+    try {
+        const response = await axios.get('http://127.0.0.1:8000/api/posts');
+        setPosts(response.data);
+    } catch (error) {
+        console.error('Erro ao buscar os posts:', error);
+    }
+  };
 
   const formatDate = (dateString) => {
     const options = { 
@@ -41,9 +42,9 @@ const Card = () => {
     }, [posts]);
 
     const handleEdit = (post) => {
-        setEditPost(post);
-        setIsModalOpen(true);
-    };
+      setEditPost(post);
+      setIsModalOpen(true);
+  };
 
     //verify logic and details
     const updatePosts = (updatedPost) => {
@@ -52,13 +53,13 @@ const Card = () => {
 
     const handleDelete = async (postId) => {
       try {
-        await axios.delete(`http://127.0.0.1:8000/api/posts/${postId}`);
-        // Atualize o estado dos posts após a exclusão, removendo o post excluído
-        setPosts(posts.filter((post) => post.id !== postId));
+          await axios.delete(`http://127.0.0.1:8000/api/posts/${postId}`);
+          // Atualize o estado dos posts após a exclusão, removendo o post excluído
+          setPosts(posts.filter((post) => post.id !== postId));
       } catch (error) {
-        console.error('Erro ao excluir o post:', error);
+          console.error('Erro ao excluir o post:', error);
       }
-    };
+  };
 
     const toggleExpand = (index) => {
         const newExpandedPosts = [...expandedPosts];
@@ -82,6 +83,15 @@ const Card = () => {
         <div className="card-container">
             {posts.map((post, index) => (
                 <div key={post.id} className="card card-style">
+                  {isModalOpen && (
+                        <CustomModal
+                            isOpen={isModalOpen}
+                            closeModal={() => setIsModalOpen(false)}
+                            setJsonData={setPosts} // Passa a função setPosts como prop
+                            editPost={editPost}
+                            isEditMode={!!editPost}
+                        />
+                    )}
                     <div className="card-header header">
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                             <img

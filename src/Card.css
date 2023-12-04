@@ -7,12 +7,14 @@
   }
   
   .category-icon {
-    margin: 0 10px 0 0;
+    float: left;
+    margin: -2px 30px 0 19px;
+
   }
 
-  .btnConfirm{
-    margin-right: 4%;
-    background-color: red;
+  .category-two {
+    display: inline-block;
+    margin-left: -85%;
   }
   
   .card {
@@ -35,6 +37,7 @@
   }
   
   .title-icon {
-    margin: 0 0 0 -78%;
+    width: 100%;
+    overflow: hidden;
   }
   
